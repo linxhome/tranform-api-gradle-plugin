@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/buildsrc/buildsrc.iml" filepath="$PROJECT_DIR$/buildsrc/buildsrc.iml" />
       <module fileurl="file://$PROJECT_DIR$/data-binding-example.iml" filepath="$PROJECT_DIR$/data-binding-example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tranform-api-gradle-plugin.iml" filepath="$PROJECT_DIR$/tranform-api-gradle-plugin.iml" />
     </modules>
   </component>
 </project>
