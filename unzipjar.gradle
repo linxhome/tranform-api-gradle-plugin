@@ -1,0 +1,122 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 28
+
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+configurations {
+    emeded
+}
+dependencies {
+    compile configurations.emeded
+}
+
+// Paths to embedded jar files
+ext.embeddedJars = new ArrayList()
+
+
+ext.build_dir = buildDir.path.replace(File.separator, '/');
+ext.classs_javac_dir = "$build_dir/intermediates/javac/debug/compileDebugJavaWithJavac/classes"
+
+afterEvaluate {
+    // the list of dependency must be reversed to use the right overlay order.
+    def dependencies = new ArrayList(configurations.emeded.resolvedConfiguration.firstLevelModuleDependencies)
+    dependencies.reverseEach {
+
+        it.moduleArtifacts.each {
+            artifact ->
+                println "ARTIFACT 3 : "
+                println artifact
+                if (artifact.type == 'jar') {
+                    def artifactPath = artifact.file
+                    if (!embeddedJars.contains(artifactPath))
+                        embeddedJars.add(artifactPath)
+                    println(">>>embedjars" + embeddedJars)
+                } else {
+                    throw new Exception("Unhandled Artifact of type ${artifact.type}")
+                }
+        }
+    }
+
+    if (dependencies.size() > 0) {
+        // Merge Assets
+        compileDebugJavaWithJavac.finalizedBy embedJavaJars
+    }
+}
+
+task embedJavaJars() {
+    doLast {
+        println("embedJavaJars()" + embeddedJars)
+        embeddedJars.each { jarPath ->
+
+            // Explode all classes.jar files to classes so that they can be proguarded
+            println jarPath
+            println embeddedJars
+
+            copy {
+                from zipTree(jarPath)
+                into classs_javac_dir
+            }
+
+            if(jarPath.toString().contains("okhttp")) {
+                new Injector().inject()
+            }
+        }
+    }
+
+}
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    api deps.okio
+    api deps.kotlinStdlib
+    compileOnly deps.conscrypt
+    compileOnly deps.android
+    compileOnly deps.jsr305
+    compileOnly deps.animalSniffer
+
+    emeded "com.squareup.okhttp3:okhttp:4.0.1"
+
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
+}
+
+
+class Injector {
+    public void injectClient() {
+        //just inject the class file
+
+        println("inject")
+
+    }
+}
+
